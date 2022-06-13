@@ -1,5 +1,5 @@
 Fish[] fishes = new Fish[20];   // 객체 배열 생성
-Food[] foods = new Food[20];    // 객체 배열 생성
+ArrayList<Food> foods = new ArrayList<Food>();
 int foodNum = -1;               // 마지막 먹이 변수
 
 void setup(){
@@ -12,15 +12,16 @@ void draw(){
   background(255);
   for(Fish r: fishes) r.draw();   // 물고기 그리기
   
-  // 마우스 클릭하면 먹이 생성
-  if(mousePressed == true){
-    foodNum++;
-    foods[foodNum] = new Food();   // 먹이 객체 생성
-  }
-  
   if(foodNum>=0){   // NullPointerException 방지
-    foods[foodNum].draw();         //먹이 그리기
+    foods.get(foodNum).draw();         //먹이 그리기
+    loop();
   }
+}
+
+// 마우스 클릭하면 먹이 생성
+void mousePressed(){
+  foodNum++;
+  foods.add(new Food());
 }
 
 // 물고기 클래스****************************
@@ -44,7 +45,7 @@ class Fish{
     // 가까운 애들 추적
     if(foodNum>=0){
       for(int i=0; i<foodNum; i++){
-        float dist= PVector.dist(pos, foods[i].fpos);   // 왜 서로 붙음?
+        float dist= PVector.dist(pos, foods.get(i).fpos);
         if(dist<minDist){
           minDist = dist;
           minDistFood=i;   // 가장 가까운 먹이
@@ -53,14 +54,13 @@ class Fish{
     
       // 거리가 150 미만이면
       if(minDist<150){
-        Food target = foods[minDistFood];   // 그 먹이를 타겟으로 설정
+        Food target = foods.get(minDistFood);   // 그 먹이를 타겟으로 설정
         
         // 속도 크기, 방향 계산
         PVector vel = PVector.sub(target.fpos, pos);
         // 속도 지정
         vel.normalize();   // 크기 1
         vel.mult(5);      // 그쪽으로
-        
         // 속도 기반 위치 업데이트
         pos.add(vel);
       }
@@ -73,8 +73,8 @@ class Fish{
     if(pos.y<0) pos.y=height;
     
     fill(255);
+    triangle(pos.x, pos.y, pos.x-10, pos.y-5, pos.x-10, pos.y+5);   // 꼬리
     ellipse(pos.x, pos.y, 15, 10);   // 몸통
-    triangle(pos.x, pos.y, pos.x-5, pos.y-5, pos.x+5, pos.y+5);   // 꼬리
   }
 }
 
@@ -87,6 +87,7 @@ class Food{
   }
   
   void draw(){
+    fill(57, 29, 0);   // 갈색
     circle(fpos.x, fpos.y, 10);
     
     // 중력 작용
