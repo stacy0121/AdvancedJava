@@ -1,6 +1,6 @@
 Fish[] fishes = new Fish[20];   // 객체 배열 생성
 ArrayList<Food> foods = new ArrayList<Food>();
-int foodNum = -1;               // 마지막 먹이 변수
+int foodNum = -1;            // 마지막 먹이 변수
 
 void setup(){
   size(800, 800);
@@ -12,16 +12,21 @@ void draw(){
   background(255);
   for(Fish r: fishes) r.draw();   // 물고기 그리기
   
-  if(foodNum>=0){   // NullPointerException 방지
-    foods.get(foodNum).draw();         //먹이 그리기
-    loop();
+  if(mousePressed == true){
+    foodNum++;   // 객체 수
+    foods.add(new Food());   // 객체 생성 및 배열에 넣기
   }
+  if(foodNum >= 0)  foods.get(foodNum).draw();   // 먹이 생성
 }
 
 // 마우스 클릭하면 먹이 생성
 void mousePressed(){
-  foodNum++;
-  foods.add(new Food());
+  foodNum++;   // 객체 수
+  foods.add(new Food());   // 객체 생성 및 배열에 넣기
+  
+  if(foodNum >= 0)  foods.get(foodNum).draw();   // 먹이 생성
+  
+  //while(foods.get(foodNum).fpos.y<height){   // 실패. 보류
 }
 
 // 물고기 클래스****************************
