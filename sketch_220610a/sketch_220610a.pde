@@ -1,32 +1,41 @@
 Fish[] fishes = new Fish[20];   // 객체 배열 생성
 ArrayList<Food> foods = new ArrayList<Food>();
-int foodNum = -1;            // 마지막 먹이 변수
+PImage photo;
+int angle=60;
 
 void setup(){
   size(800, 800);
   frameRate(10);
   for(int i=0; i<fishes.length; i++) fishes[i] = new Fish();   // 배열 속 객체 생성
+  photo = loadImage("che.png");
 }
 
 void draw(){
   background(255);
-  for(Fish r: fishes) r.draw();   // 물고기 그리기
-  
-  if(mousePressed == true){
-    foodNum++;   // 객체 수
-    foods.add(new Food());   // 객체 생성 및 배열에 넣기
+  pushMatrix();
+    rotate(radians(angle));
+        if (keyPressed) {
+      if (key=='r'||key == 'R') {
+            angle--;
+    image(photo, 0, 0);
+
+      }
   }
-  if(foodNum >= 0)  foods.get(foodNum).draw();   // 먹이 생성
+  popMatrix();
+  for(Fish r: fishes) r.draw();   // 물고기 그리기
+
+  if(foods.size()>=0){
+    for(int i=0; i<foods.size(); i++)  foods.get(i).draw();   // 먹이 생성. thread?
+  }
+}
+
+void keyReleased() {
+    angle=60;
 }
 
 // 마우스 클릭하면 먹이 생성
 void mousePressed(){
-  foodNum++;   // 객체 수
   foods.add(new Food());   // 객체 생성 및 배열에 넣기
-  
-  if(foodNum >= 0)  foods.get(foodNum).draw();   // 먹이 생성
-  
-  //while(foods.get(foodNum).fpos.y<height){   // 실패. 보류
 }
 
 // 물고기 클래스****************************
@@ -48,8 +57,8 @@ class Fish{
     float minDist=Float.MAX_VALUE;
     // 타겟 선정
     // 가까운 애들 추적
-    if(foodNum>=0){
-      for(int i=0; i<foodNum; i++){
+    if(foods.size()>=0){
+      for(int i=0; i<foods.size(); i++){
         float dist= PVector.dist(pos, foods.get(i).fpos);
         if(dist<minDist){
           minDist = dist;
@@ -66,8 +75,11 @@ class Fish{
         // 속도 지정
         vel.normalize();   // 크기 1
         vel.mult(5);      // 그쪽으로
+        // translate(pos.x, pos.y);   // Flocking 예제?
+        //vel.heading();   // 도형 파라미터도 바꾸기
         // 속도 기반 위치 업데이트
         pos.add(vel);
+        // 먹이 객체가 없어지면 그대로 가기
       }
     }
     
@@ -78,6 +90,7 @@ class Fish{
     if(pos.y<0) pos.y=height;
     
     fill(255);
+    
     triangle(pos.x, pos.y, pos.x-10, pos.y-5, pos.x-10, pos.y+5);   // 꼬리
     ellipse(pos.x, pos.y, 15, 10);   // 몸통
   }
