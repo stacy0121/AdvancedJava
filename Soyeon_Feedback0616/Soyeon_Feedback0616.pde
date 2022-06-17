@@ -113,18 +113,25 @@ class Fish {
     if (pos.y>height) pos.y=0;
     if (pos.y<0) pos.y=height;
     
-    // 이동하던 방향에 반대로 가는 물고기 그리기
+    // 회전 및 방향을 바꾸어 물고기 그리기
     pushMatrix();
     translate(pos.x, pos.y);   // 물고기 위치로 좌표계 이동
-    if(vel!=null){             // nullPointerException 방지
+    if(vel!=null){             // NullPointerException 방지
       float theta = vel.heading();   // 먹이 방향 회전 각도
       rotate(theta);
+      if(posC != null){
+        if((direction == true && posC.x<0) || (direction == false && posC.x>0))
+          rotate(PI);   // 꼬리로 오는 것을 방지
+      }
+      if(foods.size() > 0){ // for문? 먹이를 많이 생성하면 IndexOutOfBoundsException
+        if((direction == true && foods.get(minDistFood).posF.x<0) || (direction == false && foods.get(minDistFood).posF.x>0))
+          rotate(PI);
+      }
     }
-    
+    fill(255);
     if(direction==true){   // 오른쪽으로 이동하는 물고기 그림
       pos.x += random(-5, 10);
       pos.y += random(-2, 2);
-      fill(255);
       triangle(0, 0, 0-10, 0-5, 0-10, 0+5);   // 꼬리(좌표계 이동 상태)
       ellipse(0,0, 15, 10);   // 몸통
     } else{   // 왼쪽으로 이동
