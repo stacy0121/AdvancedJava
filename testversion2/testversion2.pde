@@ -3,10 +3,13 @@ ArrayList<Food> foods = new ArrayList<Food>();
 PImage photo;
 int angle=60;
 PVector posC; // 클릭 회피를 위한 좌표
-PVector posR;
 boolean flag = false;   // 우클릭 상태
 ArrayList<Fish> chefish = new ArrayList<Fish>();
 ArrayList<Fish> fishes = new ArrayList<Fish>();
+
+float a=365; //뜰채 원 x좌표
+float b=250; //뜰채 원 y좌표
+  PVector posCF;
 
 
 void setup() {
@@ -18,15 +21,25 @@ void setup() {
 
 void draw() {
   background(255);
+  pushMatrix();
+  rotate(radians(angle));
+  if (keyPressed) {
+    if (key=='r'||key == 'R') {
+      angle--;
+      ellipse(a, b, 150, 100);
+      image(photo, 0, 0);
+      posCF = new PVector(a, b);
+      println(posCF);
+    }
+  }
+  popMatrix();
 
   for (Fish r : fishes) r.draw();   // 물고기 그리기
 
   if (foods.size()>=0) {
     for (int i=0; i<foods.size(); i++)  foods.get(i).draw();   // 먹이 생성
   }
-  
-  CheFish cheafish = new CheFish();
-  cheafish.draw(); 
+
 }
 
 void keyReleased() {
@@ -48,6 +61,9 @@ void mousePressed() {
 class Fish {
   PVector pos;   // 물고기 위치
   boolean direction = true;   // 방향 지시 (기본 오른쪽)
+  
+  float distR;
+  float distCF;
 
   Fish() {
     pos = new PVector(random(0, width), random(0, height));   // 랜덤 스폰
@@ -59,7 +75,6 @@ class Fish {
     int minDistFood = 0;
     float minDist=Float.MAX_VALUE;
     float distC;
-
 
     // 타겟 선정
     // 가까운 애들 추적
@@ -104,6 +119,51 @@ class Fish {
         pos.add(vel);      // 속도 기반 위치 업데이트
       }
     }
+    
+    // 채 회피**************************************************************************
+    //pushMatrix();
+    //rotate(radians(angle));
+    //if (keyPressed) {
+    //  if (key=='r'||key == 'R') {
+    //    angle--;
+    //    ellipse(a, b, 150, 100);
+    //    image(photo, 0, 0);
+    //  }
+    //}
+    //pushMatrix();
+    //rotate(radians(angle));
+    //println(posCF);
+    // 가까운 물고기 추적
+    if (fishes.size()>=0) {
+      for (int k=0; k<fishes.size(); k++) {
+        if(posCF != null){
+          distCF = PVector.dist(posCF, fishes.get(k).pos);   // 둘의 좌표계가 다름
+          // 거리 200 미만인 물고기 배열에 넣기
+          if (distCF<200) {
+            chefish.add(fishes.get(k));
+          }
+        //popMatrix();   // 어디 위치?
+        }
+      }
+    }
+    //회피
+    //for문을 써서 배열에서 뺴기
+    PVector velCF = null;
+    for (int i=0; i<chefish.size(); i++) {
+      // 속도 크기, 방향 계산
+      velCF = PVector.sub(chefish.get(i).pos, posCF);
+      // 속도 지정
+      velCF.normalize();   // 크기 1
+      velCF.mult(-5);      // 반대쪽으로
+      chefish.get(i).pos.add(velCF);      // 속도 기반 위치 업데이트
+
+      // 뜰채에 떠짐(제거)
+      if (distCF<150) {
+        // for문 if랑 위치 바꿔줘보기
+        chefish.remove(i);
+      }
+    }
+    popMatrix();   // 어느 위치?
 
     // 경계조건 (방향 전환)
     if (pos.x>width) direction = false;   // 오른쪽으로 끝까지 갔을 때
@@ -131,71 +191,71 @@ class Fish {
       triangle(0, 0, 0+10, 0+5, 0+10, 0-5);   // 꼬리
       ellipse(0, 0, 15, 10);   // 몸통
     }
-    popMatrix();
+    //popMatrix();
   }
 }
 
-class CheFish {
-  float a=365; //뜰채 원 x좌표
-  float b=250; //뜰채 원 y좌표
-  float distR;
-  PVector pos;
-  float dist;
+//class CheFish {
+//  float a=365; //뜰채 원 x좌표
+//  float b=250; //뜰채 원 y좌표
+//  float distR;
+//  PVector pos;
+//  float dist;
 
-  CheFish() {
-    pos = new PVector(a, b);
-  }
+//  CheFish() {
+//    posCF = new PVector(a, b);
+//  }
 
-  void draw() {
-    float minDist=Float.MAX_VALUE;
-    int minDistFish = 0;
-    pushMatrix();
-    rotate(radians(angle));
-    if (keyPressed) {
-      if (key=='r'||key == 'R') {
-        angle--;
-        ellipse(a, b, 150, 100);
-        image(photo, 0, 0);
-      }
-    }
-    popMatrix();   // 어디 위치?
-    //if (angle>=60) {
-    // 가까운 물고기 추적
-    if (fishes.size()>=0) {
-      for (int k=0; k<fishes.size(); k++) {
-        dist = PVector.dist(pos, fishes.get(k).pos);   // pos
-        if (dist<100) {
-          chefish.add(fishes.get(k));
+//  void draw() {
+//    float minDist=Float.MAX_VALUE;
+//    int minDistFish = 0;
+//    pushMatrix();
+//    rotate(radians(angle));
+//    if (keyPressed) {
+//      if (key=='r'||key == 'R') {
+//        angle--;
+//        ellipse(a, b, 150, 100);
+//        image(photo, 0, 0);
+//      }
+//    }
+//    popMatrix();   // 어디 위치?
+//    //if (angle>=60) {
+//    // 가까운 물고기 추적
+//    if (fishes.size()>=0) {
+//      for (int k=0; k<fishes.size(); k++) {
+//        dist = PVector.dist(pos, fishes.get(k).pos);   // pos
+//        if (dist<100) {
+//          chefish.add(fishes.get(k));
 
-          // 거리 100 미만인 물고기 배열에 넣기  (fishes.get(k))
-        }
-        //            if (dist<minDist) {
-        //              minDist = dist;
-        //              minDistChe = k;   // 가장 가까운 물고기
-        //            }
+//          // 거리 100 미만인 물고기 배열에 넣기  (fishes.get(k))
+//        }
+//        //            if (dist<minDist) {
+//        //              minDist = dist;
+//        //              minDistChe = k;   // 가장 가까운 물고기
+//        //            }
 
-        //popMatrix();   // 어디 위치?
-      }
-    }
-    //회피
-    //for문을 써서 배열에서 뺴기
-    PVector vel = null;
-    for (int i=0; i<chefish.size(); i++) {
-      // 속도 크기, 방향 계산
-      vel= PVector.sub(chefish.get(i).pos, pos);
-      // 속도 지정
-      vel.normalize();   // 크기 1
-      vel.mult(-5);      // 반대쪽으로
-      chefish.get(i).pos.add(vel);      // 속도 기반 위치 업데이트
+//        //popMatrix();   // 어디 위치?
+//      }
+//    }
+//    //회피
+//    //for문을 써서 배열에서 뺴기
+//    PVector vel = null;
+//    for (int i=0; i<chefish.size(); i++) {
+//      // 속도 크기, 방향 계산
+//      vel= PVector.sub(chefish.get(i).pos, pos);
+//      // 속도 지정
+//      vel.normalize();   // 크기 1
+//      vel.mult(-5);      // 반대쪽으로
+//      chefish.get(i).pos.add(vel);      // 속도 기반 위치 업데이트
 
-      // 뜰채에 떠짐(제거)
-      if (dist<5) {
-        // for문 if랑 위치 바꿔줘보기
-        chefish.remove(i);
-      }
-    }
-  }
-}
+//      // 뜰채에 떠짐(제거)
+//      if (dist<5) {
+//        // for문 if랑 위치 바꿔줘보기
+//        chefish.remove(i);
+//      }
+//    }
+//  }
+//}
 
 
 
