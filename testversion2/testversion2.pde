@@ -6,60 +6,62 @@ boolean flag = false;   // 우클릭 상태
 ArrayList<Fish> chefish = new ArrayList<Fish>();
 ArrayList<Fish> fishes = new ArrayList<Fish>();
 
-float a=365; //뜰채 원 x좌표
-float b=250; //뜰채 원 y좌표
-PVector posCF;
+float a=365;   //뜰채 원 x좌표
+float b=250;   //뜰채 원 y좌표
+PVector posCF;   // 뜰채 위치 벡터
 
-//PImage crab;
-//PImage stones;
-//PImage stones1;
-//PImage seaweed1;
-//PImage seaweed2;
-//PImage seaweed3;
-//PImage sea_snail;
-//PImage reef;
-//PImage malmizal;
+PImage crab;
+PImage stones;
+PImage stones1;
+PImage seaweed1;
+PImage seaweed2;
+PImage seaweed3;
+PImage sea_snail;
+PImage reef;
+PImage malmizal;
 
 Fish newborn;
 
 void setup() {
   size(1200, 800);
   frameRate(10);
-  for (int i=0; i<20; i++) fishes.add(new Fish());   // 배열 속 객체 생성
+  for (int i=0; i<20; i++) fishes.add(new Fish());   // 물고기 20마리 생성
   photo = loadImage("che.png");
-  //crab = loadImage("crab.png");
-  //stones = loadImage("stones.png");
-  //stones1 = loadImage("stone1.png");
-  //seaweed1 = loadImage("seaweed1.png");
-  //seaweed2 = loadImage("seaweed2.png");
-  //seaweed3 = loadImage("seaweed3.png");
-  //sea_snail = loadImage("sea-snail.png");
-  //reef = loadImage("reef.png");
-  //malmizal = loadImage("malmizal.png");
+  crab = loadImage("crab.png");
+  stones = loadImage("stones.png");
+  stones1 = loadImage("stone1.png");
+  seaweed1 = loadImage("seaweed1.png");
+  seaweed2 = loadImage("seaweed2.png");
+  seaweed3 = loadImage("seaweed3.png");
+  sea_snail = loadImage("sea-snail.png");
+  reef = loadImage("reef.png");
+  malmizal = loadImage("malmizal.png");
 }
 
 void draw() {
+  // 배경
   background(184, 223, 248);
   noStroke();
   fill(240, 192, 128);
   rect(0, 785, 1200, 15);
-  //image(stones, 0, 700, 120, 120);
-  //image(stones1, 1100, 710, 100, 100);
-  //image(seaweed1, 100, 620, 150, 200);
-  //image(sea_snail, 110, 770, 30, 30);
-  //image(seaweed3, 180, 650, 150, 150);
-  //image(seaweed2, 280, 610, 150, 200);
-  //image(seaweed3, 400, 650, 150, 150);
-  //image(sea_snail, 400, 750, 50, 50);
-  //image(seaweed1, 470, 620, 150, 200);
-  //image(stones1, 700, 710, 100, 100);
-  //image(seaweed2, 800, 710, 150, 100);
-  //image(seaweed2, 900, 660, 150, 150);
-  //image(seaweed1, 1000, 620, 150, 200);
-  //image(reef, 620, 720, 80, 80);
-  //image(crab, 1050, 750, 50, 50);
-  //image(malmizal, 580, 750, 50, 50);
+  image(stones, 0, 700, 120, 120);
+  image(stones1, 1100, 710, 100, 100);
+  image(seaweed1, 100, 620, 150, 200);
+  image(sea_snail, 110, 770, 30, 30);
+  image(seaweed3, 180, 650, 150, 150);
+  image(seaweed2, 280, 610, 150, 200);
+  image(seaweed3, 400, 650, 150, 150);
+  image(sea_snail, 400, 750, 50, 50);
+  image(seaweed1, 470, 620, 150, 200);
+  image(stones1, 700, 710, 100, 100);
+  image(seaweed2, 800, 710, 150, 100);
+  image(seaweed2, 900, 660, 150, 150);
+  image(seaweed1, 1000, 620, 150, 200);
+  image(reef, 620, 720, 80, 80);
+  image(crab, 1050, 750, 50, 50);
+  image(malmizal, 580, 750, 50, 50);
   
+  // 뜰채 움직임
   pushMatrix();
   rotate(radians(angle));
   if (keyPressed) {
@@ -86,12 +88,12 @@ void keyReleased() {
 
 // 마우스 클릭 이벤트
 void mousePressed() {
-  if (mouseButton == LEFT) {  // 좌클릭 먹이 생성
-    foods.add(new Food());    // 객체 생성 및 배열에 넣기
+  if (mouseButton == LEFT) {           // 좌클릭 먹이 생성
+    foods.add(new Food());             // 객체 생성 및 배열에 넣기
   } else if (mouseButton == RIGHT) {   // 우클릭 클릭 좌표 저장
     posC = new PVector(mouseX, mouseY);
     noFill();
-    circle(mouseX, mouseY, 20);   // 파티클
+    circle(mouseX, mouseY, 20);
   }
 }
 
@@ -99,22 +101,27 @@ void mousePressed() {
 class Fish {
   PVector pos;   // 물고기 위치
   boolean direction = true;   // 방향 지시 (기본 오른쪽)
-
   float distR;
   float distCF;   // 클릭 좌표
-
+  
+  // 물고기 크기
   int size = 1;
   int sizeTW = 10;
   int sizeTH = 5;
   int sizeW = 15;
   int sizeH = 10;
 
-  Fish() {
+  boolean neww = false;
+  color c;
+
+  Fish() {   // 기본 생성자
     pos = new PVector(random(0, width), random(0, height-15));   // 랜덤 스폰
   }
   
   Fish(float x, float y) {
-    pos = new PVector(x, y);   // 랜덤 스폰
+    pos = new PVector(x, y);   // 지정 스폰
+    neww = true;              // 새로 태어났을 때
+    c = color(random(235), random(235), random(235));   // 태어날 때 한 번 색 정하기
   }
 
   boolean born = false;
@@ -129,12 +136,11 @@ class Fish {
 
     // 평상시 움직임
     PVector vel=null;
-    // vel.x > 0
     if (direction==true) {   // 오른쪽으로 이동하는 물고기 그림
-      vel = new PVector(random(0, 12), random(-1, 1));
+      vel = new PVector(random(0, 15), random(-0.5, 0.5));
       pos.add(vel);
     } else {   // 왼쪽으로 이동
-      vel = new PVector(-random(0, 12), -random(-1, 1));
+      vel = new PVector(-random(0, 15), -random(-0.5, 0.5));
       pos.add(vel);
     }
     
@@ -157,15 +163,15 @@ class Fish {
       vel = PVector.sub(target.posF, pos);
       // 속도 지정
       vel.normalize();
-      vel.mult(5);       // 크기 5만큼 먹이 쪽으로
+      vel.mult(8);       // 크기 8만큼 먹이 쪽으로
       pos.add(vel);   // 속도 기반 위치(pos) 업데이트
     }
     
     // 먹이를 먹으면 (거리가 가까워지면)
-    if (minDist<10 && size < 3) {
+    if (minDist<15 && size < 3) {
       // 먹이를 없애고 크기 키우기
       foods.remove(minDistFood);
-      // size 변수, sizeTW = 10, sizeTH = 5, sizeW= 15; int sizeH = 10
+      // sizeTW = 10, sizeTH = 5, sizeW= 15; int sizeH = 10
       size++;
       sizeTW +=10;
       sizeTH +=5;
@@ -173,25 +179,25 @@ class Fish {
       sizeH +=10;
     }
     
-    // 번식
-    // 타겟 선정
+    // <성장(번식, 잡아먹기)>
     if (fishes.size()>=0) {
       for (int i=0; i<fishes.size(); i++) {
         distF = PVector.dist(pos, fishes.get(i).pos);
+        // 나와의 거리 15 미만인 물고기와 번식
         if (distF<15 && fishes.get(i).size == size && fishes.indexOf(this)!=i && size==3 && born == false) {
             born = true;
 
             float newbornP = (fishes.get(i).pos.x + pos.x) / 2;   // 둘 사이
             float newbornY = (fishes.get(i).pos.y + pos.y) / 2;
 
-            Fish newBorn = new Fish(newbornP, newbornY);
+            Fish newBorn = new Fish(newbornP, newbornY);   // 새로운 물고기
             fishes.add(newBorn);
           }
         
         //성장(잡아 먹기)
         if (distF<10 && fishes.get(i).size < size && size<3) {
-          fishes.remove(fishes.get(i));
-          size++;
+          fishes.remove(fishes.get(i));   // 작은 물고기 제거
+          size++;                         // 크기 성장
           sizeTW +=10;
           sizeTH +=5;
           sizeW +=15;
@@ -208,7 +214,7 @@ class Fish {
         vel= PVector.sub(posC, pos);
         // 속도 지정
         vel.normalize();   // 크기 1
-        vel.mult(-5);      // 반대쪽으로
+        vel.mult(-8);      // 반대쪽으로
         pos.add(vel);      // 속도 기반 위치 업데이트
       }
     } else if ((keyPressed && key=='r' &&  key=='R')) {
@@ -220,21 +226,21 @@ class Fish {
         velCF = PVector.sub(pos, posCF);
         // 속도 지정
         velCF.normalize();   // 크기 1
-        velCF.mult(-5);      // 반대쪽으로
+        velCF.mult(-8);      // 반대쪽으로
         pos.add(velCF);      // 속도 기반 위치 업데이트
       }
     }
 
-    // 채 회피
-    // 가까운 물고기 추적
+    // <채 회피>
     if (fishes.size()>=0) {
       for (int k=0; k<fishes.size(); k++) {
         if (posCF != null) {
           distCF = PVector.dist(posCF, fishes.get(k).pos);
-          // 거리 100 미만인 물고기 배열에 넣기
+          // 거리 100 미만인 물고기
           if (distCF<100) {
             chefish.add(fishes.get(k));
             fishes.get(k).pos = posCF;
+            // 채에 딸려 올라가면 제거
             if (pos.y < 0  && chefish.contains(this) == true) {
               chefish.remove(this);
               fishes.remove(this);
@@ -245,7 +251,7 @@ class Fish {
     }
 
     // 경계조건 (방향 전환)
-    if (pos.x>width) direction = false;   // 오른쪽으로 끝까지 갔을 때
+    if (pos.x>width) direction = false;   // 오른쪽 끝까지 갔을 때 왼쪽으로
     if (pos.x<0) direction = true;
     if (pos.y>height) pos.y=0;
     if (pos.y<0) pos.y=height;
@@ -259,6 +265,11 @@ class Fish {
     if (size == 1) fill(255);
     else if (size ==2)  fill(255, 217, 236);
     else fill(255, 0, 0);
+    
+    if (neww == true) {
+      if (size == 1) fill(c);
+      else if (size>=2)  fill(c+10);
+    }
     
     float theta = vel.heading();   // 먹이 방향 회전 각도
     rotate(theta);
@@ -284,6 +295,6 @@ class Food {
     // 중력 작용
     posF.y+=3;
 
-    if (posF.y>height) posF.y=height;   // 땅에 떨어짐
+    if (posF.y>height-15) posF.y=height-15;   // 땅에 떨어짐
   }
 }
