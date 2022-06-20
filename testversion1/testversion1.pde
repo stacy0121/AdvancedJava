@@ -31,7 +31,7 @@ void setup() {
   frameRate(10);
   for (int i=0; i<20; i++) fishes.add(new Fish());   // 배열 속 객체 생성
   photo = loadImage("che.png");
-    crab = loadImage("crab.png");
+  crab = loadImage("crab.png");
   stones = loadImage("stones.png");
   stones1 = loadImage("stone1.png");
   seaweed1 = loadImage("seaweed1.png");
@@ -63,6 +63,7 @@ void draw() {
   image(reef, 620, 720, 80, 80);
   image(crab, 1050, 750, 50, 50);
   image(malmizal, 580, 750, 50, 50);
+
   pushMatrix();
   rotate(radians(angle));
   if (keyPressed) {
@@ -71,7 +72,7 @@ void draw() {
       ellipse(a, b, 150, 100);
       image(photo, 0, 0);
       posCF = new PVector(a, b);
-      println(posCF);
+      posCF.rotate(radians(angle));
     }
   }
   popMatrix();
@@ -80,7 +81,7 @@ void draw() {
   //      Fish fish = fishIterator2.next();   // error
   //fish.draw();
   //}
-  for (Fish r : fishes) r.draw();   // 물고기 그리기
+  for (int i = fishes.size()-1; i>=0; i--) fishes.get(i).draw();   // 물고기 그리기
 
   if (foods.size()>=0) {
     for (int i=0; i<foods.size(); i++)  foods.get(i).draw();   // 먹이 생성
@@ -117,7 +118,7 @@ class Fish {
   int sizeH = 10;
 
   Fish() {
-    pos = new PVector(random(0, width), random(0, height));   // 랜덤 스폰
+    pos = new PVector(random(0, width), random(0, height-15));   // 랜덤 스폰
   }
 
   void draw() {
@@ -181,114 +182,123 @@ class Fish {
       }
     }
 
-      // 오른쪽으로 이동하는 물고기만 반대로 가게
-      // <클릭하고 있으면 회피>
-      if (mousePressed && mouseButton==RIGHT) {
-        distC = PVector.dist(pos, posC);   // 클릭 좌표와의 거리 계산
-        if (distC<100) {   // 거리가 100 이하면
-          // 속도 크기, 방향 계산
-          vel= PVector.sub(posC, pos);
-          // 속도 지정
-          vel.normalize();   // 크기 1
-          vel.mult(-5);      // 반대쪽으로
-          pos.add(vel);      // 속도 기반 위치 업데이트
-        }
-      }
 
-      // 채 회피**************************************************************************
-      // pushMatrix();
-      //rotate(radians(angle));
-      //println(posCF);
-      // 가까운 물고기 추적
-      if (fishes.size()>=0) {
-        for (int k=0; k<fishes.size(); k++) {
-          if (posCF != null) {
-            distCF = PVector.dist(posCF, fishes.get(k).pos);   // 둘의 좌표계가 다름
-            // 거리 200 미만인 물고기 배열에 넣기
-            if (distCF<200) {
-              chefish.add(fishes.get(k));
-            }
-            //popMatrix();   // 어디 위치?
-          }
-        }
-      }
-      //회피
-      //for문을 써서 배열에서 뺴기
-      PVector velCF = null;
-      for (int i=0; i<chefish.size(); i++) {
+    // <우클릭을 하거나 r키를 누르면 회피>
+    if ((mousePressed && mouseButton==RIGHT)) {
+      distC = PVector.dist(pos, posC);   // 클릭 좌표와의 거리 계산
+      if (distC<100) {   // 거리가 100 이하면
         // 속도 크기, 방향 계산
-        velCF = PVector.sub(chefish.get(i).pos, posCF);
+        vel= PVector.sub(posC, pos);
+        // 속도 지정
+        vel.normalize();   // 크기 1
+        vel.mult(-5);      // 반대쪽으로
+        pos.add(vel);      // 속도 기반 위치 업데이트
+      }
+    } else if ((keyPressed && key=='r' &&  key=='R')) {
+      //채 회피
+      PVector velCF = null;
+      distCF = PVector.dist(pos, posC);   // 클릭 좌표와의 거리 계산
+      if (distCF<100) {   // 거리가 100 이하면
+        // 속도 크기, 방향 계산
+        velCF = PVector.sub(pos, posCF);
         // 속도 지정
         velCF.normalize();   // 크기 1
         velCF.mult(-5);      // 반대쪽으로
-        chefish.get(i).pos.add(velCF);      // 속도 기반 위치 업데이트
-
-        // 뜰채에 떠짐(제거)
-        if (distCF<150) {
-          // for문 if랑 위치 바꿔줘보기
-          chefish.remove(i);
-        }
+        pos.add(velCF);      // 속도 기반 위치 업데이트
       }
-      //popMatrix();   // 어느 위치?
-
-      // 경계조건 (방향 전환)
-      if (pos.x>width) direction = false;   // 오른쪽으로 끝까지 갔을 때
-      if (pos.x<0) direction = true;
-      if (pos.y>height) pos.y=0;
-      if (pos.y<0) pos.y=height;
-
-
-
-      // 이동하던 방향에 반대로 가는 물고기 그리기
-      pushMatrix();
-      translate(pos.x, pos.y);   // 물고기 위치로 좌표계 이동
-      if (vel!=null) {             // nullPointerException 방지
-        float theta = vel.heading();   // 먹이 방향 회전 각도
-        rotate(theta);
-        if (posC != null) {
-          if ((direction == true && posC.x<0) || (direction == false && posC.x>0))
-            rotate(PI);   // 꼬리로 오는 것을 방지
-        }
-        if (foods.size() > 0) { // for문? 먹이를 많이 생성하면 IndexOutOfBoundsException
-          if ((direction == true && foods.get(minDistFood).posF.x<0) || (direction == false && foods.get(minDistFood).posF.x>0))
-            rotate(PI);
-        }
-      }
-      stroke(0);
-      if (size == 1)    fill(255);
-      else if (size ==2)  fill(255, 217, 236);
-      else fill(255, 0, 0);
-
-      if (direction==true) {   // 오른쪽으로 이동하는 물고기 그림
-        pos.x += random(-5, 10);
-        pos.y += random(-2, 2);
-        triangle(0, 0, 0-sizeTW, 0-sizeTH, 0-sizeTW, 0+sizeTH);   // 꼬리(좌표계 이동 상태)
-        ellipse(0, 0, sizeW, sizeH);   // 몸통
-      } else {   // 왼쪽으로 이동
-        pos.x -= random(-5, 10);
-        pos.y -= random(-2, 2);
-        triangle(0, 0, 0+sizeTW, 0-sizeTH, 0+sizeTW, 0+sizeTH);   // 꼬리
-        ellipse(0, 0, sizeW, sizeH);   // 몸통
-      }
-      popMatrix();
     }
+
+
+    //채회피 하는 거 여기에 넣기
+
+    // 채에 잡힌 물고기 배열에 넣기
+    // pushMatrix();
+    //rotate(radians(angle));
+    println(posCF);
+    //가까운 물고기 추적
+    if (fishes.size()>=0) {
+      for (int k=0; k<fishes.size(); k++) {
+        if (posCF != null) {
+          distCF = PVector.dist(posCF, fishes.get(k).pos);   // 둘의 좌표계가 다름
+          // 거리 200 미만인 물고기 배열에 넣기
+          if (distCF<100) {
+            chefish.add(fishes.get(k));
+            fishes.get(k).pos = posCF;
+            if ( pos.y < 0  && chefish.contains(this) == true) {
+              chefish.remove(this);
+              fishes.remove(this);
+            }
+          }
+        }
+      }
+    }
+
+    //chefish.remove(this);   // 방생(채에 걸렸을 때만)
+
+    // 뜰채에 떠짐(화면 밖을 나갔을 때 제거)
+    //if (chefish.contains(this) == true && pos.y < 0) {
+    //  // for문 if랑 위치 바꿔줘보기
+    //  fishes.remove(this);
+    //}
+
+    // 경계조건 (방향 전환)
+    if (pos.x>width) direction = false;   // 오른쪽으로 끝까지 갔을 때
+    if (pos.x<0) direction = true;
+    if (pos.y>height) pos.y=0;
+    if (pos.y<0) pos.y=height;
+
+
+
+    // 이동하던 방향에 반대로 가는 물고기 그리기
+    pushMatrix();
+    translate(pos.x, pos.y);   // 물고기 위치로 좌표계 이동
+    if (vel!=null) {             // nullPointerException 방지
+      float theta = vel.heading();   // 먹이 방향 회전 각도
+      rotate(theta);
+      if (posC != null) {
+        if ((direction == true && posC.x<0) || (direction == false && posC.x>0))
+          rotate(PI);   // 꼬리로 오는 것을 방지
+      }
+      if (foods.size() > 0) { // for문? 먹이를 많이 생성하면 IndexOutOfBoundsException
+        if ((direction == true && foods.get(minDistFood).posF.x<0) || (direction == false && foods.get(minDistFood).posF.x>0))
+          rotate(PI);
+      }
+    }s
+    stroke(0);
+    if (size == 1)    fill(255);
+    else if (size ==2)  fill(255, 217, 236);
+    else fill(255, 0, 0);
+
+    if (direction==true) {   // 오른쪽으로 이동하는 물고기 그림
+      pos.x += random(-5, 15);
+      pos.y += random(-2, 2);
+      triangle(0, 0, 0-sizeTW, 0-sizeTH, 0-sizeTW, 0+sizeTH);   // 꼬리(좌표계 이동 상태)
+      ellipse(0, 0, sizeW, sizeH);   // 몸통
+    } else {   // 왼쪽으로 이동
+      pos.x -= random(-5, 15);
+      pos.y -= random(-2, 2);
+      triangle(0, 0, 0+sizeTW, 0-sizeTH, 0+sizeTW, 0+sizeTH);   // 꼬리
+      ellipse(0, 0, sizeW, sizeH);   // 몸통
+    }
+    popMatrix();
+  }
+}
+
+// 먹이 클래스****************************
+class Food {
+  PVector posF;
+
+  Food() {
+    posF = new PVector(mouseX, mouseY);
   }
 
-  // 먹이 클래스****************************
-  class Food {
-    PVector posF;
+  void draw() {
+    fill(57, 29, 0);   // 갈색
+    circle(posF.x, posF.y, 10);
 
-    Food() {
-      posF = new PVector(mouseX, mouseY);
-    }
+    // 중력 작용
+    posF.y+=3;
 
-    void draw() {
-      fill(57, 29, 0);   // 갈색
-      circle(posF.x, posF.y, 10);
-
-      // 중력 작용
-      posF.y+=3;
-
-      if (posF.y>height) posF.y=height;   // 땅에 떨어짐
-    }
+    if (posF.y>height) posF.y=height;   // 땅에 떨어짐
   }
+}
