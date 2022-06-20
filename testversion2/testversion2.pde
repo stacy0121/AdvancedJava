@@ -103,6 +103,12 @@ class Fish {
   Fish() {
     pos = new PVector(random(0, width), random(0, height-15));   // 랜덤 스폰
   }
+  
+  Fish(float x, float y) {
+    pos = new PVector(x, y);   // 랜덤 스폰
+  }
+
+  boolean born = false;
 
   void draw() {
     // <먹이 추적>
@@ -110,6 +116,7 @@ class Fish {
     int minDistFood = 0;
     float minDist=Float.MAX_VALUE;
     float distC;
+    float distF;
 
     // 평상시 움직임
     PVector vel=null;
@@ -155,6 +162,37 @@ class Fish {
       sizeTH +=5;
       sizeW +=15;
       sizeH +=10;
+    }
+    
+    // 잡아먹기 ****************************************************
+    // 타겟 선정
+    if (fishes.size()>=0) {
+      for (int i=0; i<fishes.size(); i++) {
+        distF = PVector.dist(pos, fishes.get(i).pos);
+        if (distF<15 && fishes.get(i).size == size) {
+          println("born" +born);
+          println("-------------------");
+          if (size==3 && born == false) {
+            born = true;
+
+            float newbornP = (fishes.get(i).pos.x + pos.x) / 2;   // 둘 사이
+            float newbornY = (fishes.get(i).pos.y + pos.y)/2;
+
+            Fish newBorn = new Fish(newbornP, newbornY);
+            fishes.add(newBorn);
+          }
+        }
+        
+        //성장(잡아 먹기)
+        if (distF<10 && fishes.get(i).size<size && size<3) {
+          fishes.remove(fishes.get(i));
+          size++;
+          sizeTW +=10;
+          sizeTH +=5;
+          sizeW +=15;
+          sizeH +=10;
+        }
+      }
     }
 
     // <우클릭을 하거나 r키를 누르면 회피>
